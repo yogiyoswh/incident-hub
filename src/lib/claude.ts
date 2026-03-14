@@ -21,6 +21,7 @@ async function callClaude(
     const { stdout } = await execFileAsync('claude', args, {
       maxBuffer: 10 * 1024 * 1024,
       timeout: 120_000,
+      input: '',
     });
     return stdout.trim();
   } catch (err) {
