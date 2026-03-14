@@ -6,7 +6,7 @@
     "level": "Dynamic"
   },
   "currentFeature": "slack-thread-briefing",
-  "phase": "plan",
+  "phase": "design",
   "matchRate": null,
   "iterationCount": 0
 }
