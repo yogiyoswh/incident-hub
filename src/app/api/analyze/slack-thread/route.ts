@@ -24,9 +24,9 @@ export async function POST(
       );
     }
 
-    if (!/\/archives\/[A-Z0-9]+\/p\d+/.test(slackThreadUrl)) {
+    if (!/slack\.com\/archives\/[A-Z0-9]+/.test(slackThreadUrl)) {
       return NextResponse.json(
-        { success: false, error: '올바른 Slack 스레드 URL이 아닙니다' },
+        { success: false, error: 'Slack URL 형식이 아닙니다 (예: https://...slack.com/archives/...)' },
         { status: 400 },
       );
     }

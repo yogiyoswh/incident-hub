@@ -93,8 +93,9 @@ export async function generateTimeline(
 
 const SLACK_THREAD_PROMPT = (slackThreadUrl: string) => `당신은 장애 대응 전문가입니다.
 
-다음 Slack 스레드의 메시지를 mcp__mcpyo__slack_collect_channel_messages 도구로 가져온 뒤,
+mcp__mcpyo__slack_collect_channel_messages 도구로 아래 URL의 메시지를 가져온 뒤,
 브리핑과 타임라인을 생성하세요.
+URL이 스레드 링크면 해당 스레드만, 채널 링크면 최근 메시지를 가져오세요.
 
 URL: ${slackThreadUrl}
 
