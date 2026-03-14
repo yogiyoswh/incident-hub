@@ -54,10 +54,12 @@ export async function POST(
       timeline: timeline.items.map((item) => ({
         id: randomUUID(),
         time: item.time,
+        datetime: item.datetime,
         tag: item.tag,
         actor: item.actor,
         content: item.content,
         source: 'slack' as const,
+        sourceUrl: item.sourceUrl,
       })),
       responders: [],
     };

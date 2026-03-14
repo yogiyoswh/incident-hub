@@ -14,10 +14,12 @@ export type Briefing = {
 export type TimelineItem = {
   id: string;
   time: string;
+  datetime?: string;
   tag: TimelineTag;
   actor: string;
   content: string;
   source: TimelineSource;
+  sourceUrl?: string;
 };
 
 export type Responder = {
@@ -66,9 +68,11 @@ export type BriefingPromptResult = {
 export type TimelinePromptResult = {
   items: Array<{
     time: string;
+    datetime: string;
     tag: TimelineTag;
     actor: string;
     content: string;
+    sourceUrl: string;
   }>;
 };
 

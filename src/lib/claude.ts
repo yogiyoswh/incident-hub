@@ -127,19 +127,25 @@ URL: ${slackThreadUrl}
   "timeline": {
     "items": [
       {
+        "datetime": "YYYY-MM-DD HH:MM (메시지의 datetime 필드 그대로)",
         "time": "HH:MM",
         "tag": "ACTION|DECISION|HYPOTHESIS|VERIFY|RESULT",
-        "actor": "행위자 이름",
-        "content": "핵심 내용 1~2문장"
+        "actor": "행위자 display_name",
+        "content": "메시지에 실제로 쓰여진 내용만 요약. 추측/해석 금지.",
+        "sourceUrl": "https://[workspace].slack.com/archives/[channelId]/p[ts에서 점 제거]"
       }
     ]
   }
 }
 
 규칙:
-- 사실만 기술 (추측 금지)
+- content는 메시지에 명시된 사실만 기술. 추측, 해석, 없는 내용 추가 절대 금지.
+- datetime은 mcpyo가 반환한 메시지의 datetime 필드 값을 그대로 사용
+- sourceUrl은 해당 메시지의 ts 값에서 점(.)을 제거하고 p를 앞에 붙여 permalink 생성
+  예) ts=1773391681.097519 → p1773391681097519
 - 한국어로 작성
-- 중요하지 않은 메시지는 타임라인에서 제외
+- channel_join, channel_leave 등 시스템 메시지는 타임라인에서 제외
+- 장애와 직접 관련 없는 메시지는 제외
 - 시간 순서 정렬`;
 
 export type SlackThreadAnalysisResult = {

@@ -23,7 +23,7 @@ function TimelineItemRow({
   item: TimelineItem;
   isCurrent: boolean;
 }) {
-  const time = item.time;
+  const displayTime = item.datetime ?? item.time;
 
   return (
     <div className="flex gap-4 py-3">
@@ -35,8 +35,8 @@ function TimelineItemRow({
         <div className="w-px flex-1 bg-border-base mt-1" />
       </div>
       <div className="flex-1 pb-2">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="font-mono text-xs text-text-muted">{time}</span>
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
+          <span className="font-mono text-xs text-text-muted">{displayTime}</span>
           <span
             className="font-mono text-xs px-1.5 py-0.5 rounded"
             style={{
@@ -47,6 +47,20 @@ function TimelineItemRow({
             {item.tag}
           </span>
           <span className="font-mono text-xs text-text-secondary">{item.actor}</span>
+          {item.sourceUrl && (
+            <a
+              href={item.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-xs text-blue-500 hover:text-blue-400 flex items-center gap-0.5"
+              title="Slack 원문 보기"
+            >
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor">
+                <path d="M3.5 1H1v10h10V8.5M7 1h4v4M11 1L5.5 6.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+              </svg>
+              출처
+            </a>
+          )}
         </div>
         <p className="text-sm text-text-primary">{item.content}</p>
       </div>
