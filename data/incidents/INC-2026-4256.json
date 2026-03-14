@@ -1,0 +1,179 @@
+{
+  "id": "INC-2026-4256",
+  "title": "Datadog가 promoyo 서비스의 prod 환경 error rate가 0.1%를 초과했음을 감지하여 C",
+  "severity": "medium",
+  "status": "open",
+  "slackChannel": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773390773382349",
+  "createdAt": "2026-03-14T13:19:52.068Z",
+  "updatedAt": "2026-03-14T13:19:52.068Z",
+  "briefing": {
+    "detection": "Datadog가 promoyo 서비스의 prod 환경 error rate가 0.1%를 초과했음을 감지하여 CRITICAL 알림을 트리거했습니다. 메트릭 값은 0.124%로 측정되었습니다.",
+    "customerImpact": "이벤트 페이지에서 API 호출 시 대량 503 에러가 발생했습니다. 주문 관련 고객 CS 인입이 증가하였으며, orderyo 어드민 접속도 불가한 상태였습니다.",
+    "opsImpact": "Aurora MySQL orderyo-shard2-prod-b-1 인스턴스가 비정상 종료되어 prod-orderyo-shard2-db-ro에 DB 연결이 불가능했습니다. front-api의 Istio 사이드카 Readiness probe가 context deadline exceeded로 실패하였으며, promoyo 서비스 전반에서 503 에러가 다수 발생했습니다.",
+    "generatedAt": "2026-03-14T13:19:52.068Z",
+    "sourceChannel": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773390773382349"
+  },
+  "timeline": [
+    {
+      "id": "97c07d47-6915-49b6-aa3f-c135ced39d64",
+      "time": "08:32",
+      "datetime": "2026-03-13 08:32:53",
+      "tag": "RESULT",
+      "actor": "Datadog 알림",
+      "content": "[CRITICAL] promoyo servlet prod 환경에서 error rate 0.1% 이상 발생 (측정값: 0.124%). 관련 팀 및 OpsGenie에 알림.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773390773382349"
+    },
+    {
+      "id": "863812d5-3e47-4071-8d9f-3473aefbd9b6",
+      "time": "08:33",
+      "datetime": "2026-03-13 08:33:51",
+      "tag": "ACTION",
+      "actor": "이창우(Changwoo Lee) /Discovery N Promotion",
+      "content": "확인해보겠다고 응답.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773390831311469"
+    },
+    {
+      "id": "a3f3696c-af93-4280-b527-b4f7d7359a3a",
+      "time": "08:35",
+      "datetime": "2026-03-13 08:35:10",
+      "tag": "RESULT",
+      "actor": "이창우(Changwoo Lee) /Discovery N Promotion",
+      "content": "이벤트 페이지에서 API 호출 시 대량 503 에러가 발생했음을 확인하여 공유.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773390910354279"
+    },
+    {
+      "id": "3e100a13-6309-448b-885e-9d0f1a0c1bfb",
+      "time": "08:35",
+      "datetime": "2026-03-13 08:35:45",
+      "tag": "ACTION",
+      "actor": "이창우(Changwoo Lee) /Discovery N Promotion",
+      "content": "promoyo 서비스 Datadog APM 링크 공유 (에러 발생 시간대 트레이스 포함).",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773390945372149"
+    },
+    {
+      "id": "5d95d779-cc26-4706-a9df-b3a95603fa09",
+      "time": "08:37",
+      "datetime": "2026-03-13 08:37:26",
+      "tag": "ACTION",
+      "actor": "김병철(Byeongcheol Kim)/Order N Commerce-Tech",
+      "content": "Datadog APM 특정 트레이스 링크 공유.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391046618689"
+    },
+    {
+      "id": "58226929-f059-4395-a2ec-031984c1fd46",
+      "time": "08:38",
+      "datetime": "2026-03-13 08:38:38",
+      "tag": "RESULT",
+      "actor": "김병철(Byeongcheol Kim)/Order N Commerce-Tech",
+      "content": "front-api Readiness probe 실패 확인: `Get http://10.52.10.109:15020/app-health/front-api/readyz` context deadline exceeded (Client.Timeout exceeded).",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391118830629"
+    },
+    {
+      "id": "83b906c5-4bd4-4ff3-82d3-97becf0cc0e6",
+      "time": "08:38",
+      "datetime": "2026-03-13 08:38:39",
+      "tag": "RESULT",
+      "actor": "문정진(Jungjin Moon) /SRE Platform",
+      "content": "aurora-mysql-orderyo-shard2-prod-b-1 인스턴스 비정상 종료 Keepalive Alert 공유. DBA 및 주문 알림 팀에 확인 요청.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391165523829"
+    },
+    {
+      "id": "85ffdecf-731d-4a38-b2c0-fc5da47c9187",
+      "time": "08:39",
+      "datetime": "2026-03-13 08:39:25",
+      "tag": "RESULT",
+      "actor": "김병철(Byeongcheol Kim)/Order N Commerce-Tech",
+      "content": "prod-orderyo-shard2-db-ro.yogiyo.in 에 DB 연결 불가(error 2002, 115) Django OperationalError 스택트레이스 공유. orderyo 주문 내역 조회 중 발생.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391165997049"
+    },
+    {
+      "id": "73fb32e1-1454-4c90-a011-a742c7824932",
+      "time": "08:39",
+      "datetime": "2026-03-13 08:39:35",
+      "tag": "RESULT",
+      "actor": "김병철(Byeongcheol Kim)/Order N Commerce-Tech",
+      "content": "DB 연결이 안 되고 있다고 명시.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391175442679"
+    },
+    {
+      "id": "5277a837-1490-4af5-a151-68e41e1c363f",
+      "time": "08:39",
+      "datetime": "2026-03-13 08:39:44",
+      "tag": "DECISION",
+      "actor": "김병철(Byeongcheol Kim)/Order N Commerce-Tech",
+      "content": "장애 선언.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391184218679"
+    },
+    {
+      "id": "0ef1b336-d23d-4795-a43f-b17e2bef6957",
+      "time": "08:39",
+      "datetime": "2026-03-13 08:39:44",
+      "tag": "ACTION",
+      "actor": "문정진(Jungjin Moon) /SRE Platform",
+      "content": "DBA 팀에 DB 확인 요청.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391184321849"
+    },
+    {
+      "id": "f062d772-0cf9-4fc2-8a97-a45bbe6d668e",
+      "time": "08:39",
+      "datetime": "2026-03-13 08:39:54",
+      "tag": "RESULT",
+      "actor": "최이슬A(Iseul Choi)/고객만족팀",
+      "content": "주문 장애 관련 고객 CS 인입 증가 중. orderyo 어드민 접속 불가 상태 공유.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391194578869"
+    },
+    {
+      "id": "877e4800-4fca-4156-ab6a-af2040496228",
+      "time": "08:40",
+      "datetime": "2026-03-13 08:40:53",
+      "tag": "HYPOTHESIS",
+      "actor": "남성우(Sungwoo Nam)/Cloud Architect",
+      "content": "orderyo 샤드 인스턴스 장애 영향으로 추정.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391253041389"
+    },
+    {
+      "id": "10bbfbb7-4acc-4cb6-ba94-0c098771c536",
+      "time": "08:41",
+      "datetime": "2026-03-13 08:41:00",
+      "tag": "ACTION",
+      "actor": "김병철(Byeongcheol Kim)/Order N Commerce-Tech",
+      "content": "장애 대응을 별도 채널(#장애대응)에서 진행 요청.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391260456609"
+    },
+    {
+      "id": "26439475-dc61-4990-96c1-ea62202d52ac",
+      "time": "08:41",
+      "datetime": "2026-03-13 08:41:19",
+      "tag": "ACTION",
+      "actor": "남성우(Sungwoo Nam)/Cloud Architect",
+      "content": "지원 가능한 DBA 팀원 호출.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391279413409"
+    },
+    {
+      "id": "ec21d319-811c-4654-abbd-f75402b06ecf",
+      "time": "08:41",
+      "datetime": "2026-03-13 08:41:28",
+      "tag": "ACTION",
+      "actor": "박태정(Taejeong Park)/Cloud Architect",
+      "content": "확인해보겠다고 응답.",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391288060379"
+    }
+  ],
+  "responders": []
+}
