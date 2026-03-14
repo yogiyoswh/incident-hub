@@ -17,11 +17,17 @@ async function callClaude(
   if (allowedTools?.length) {
     args.push('--allowedTools', allowedTools.join(','));
   }
-  const { stdout } = await execFileAsync('claude', args, {
-    maxBuffer: 10 * 1024 * 1024,
-    timeout: 60_000,
-  });
-  return stdout.trim();
+  try {
+    const { stdout } = await execFileAsync('claude', args, {
+      maxBuffer: 10 * 1024 * 1024,
+      timeout: 120_000,
+    });
+    return stdout.trim();
+  } catch (err) {
+    const e = err as { stdout?: string; stderr?: string; message?: string };
+    const detail = e.stderr || e.stdout || e.message || 'unknown';
+    throw new Error(`claude CLI 실패: ${detail}`);
+  }
 }
 
 const BRIEFING_SYSTEM_PROMPT = `당신은 장애 대응 전문가입니다.
