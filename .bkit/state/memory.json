@@ -1,9 +1,9 @@
 {
-  "sessionCount": 10,
+  "sessionCount": 11,
   "lastSession": {
-    "startedAt": "2026-03-14T11:50:49.911Z",
+    "startedAt": "2026-03-14T12:13:31.956Z",
     "platform": "claude",
-    "level": "Starter"
+    "level": "Dynamic"
   },
   "currentFeature": "incident-hub-dashboard",
   "phase": "archived",

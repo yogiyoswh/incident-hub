@@ -1,4 +1,5 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import type {
   SlackMessage,
   BriefingPromptResult,
@@ -6,7 +7,15 @@ import type {
 } from '@/types/incident';
 import { logger } from '@/lib/logger';
 
-const client = new Anthropic();
+const execFileAsync = promisify(execFile);
+
+async function callClaude(systemPrompt: string, userContent: string): Promise<string> {
+  const fullPrompt = `${systemPrompt}\n\n${userContent}`;
+  const { stdout } = await execFileAsync('claude', ['-p', fullPrompt], {
+    maxBuffer: 10 * 1024 * 1024,
+  });
+  return stdout.trim();
+}
 
 const BRIEFING_SYSTEM_PROMPT = `당신은 장애 대응 전문가입니다.
 Slack 메시지 배열을 분석하여 다음 3가지 관점으로 브리핑을 작성하세요.
@@ -56,19 +65,7 @@ export async function generateBriefing(
 ): Promise<BriefingPromptResult> {
   logger.info('generateBriefing start', { channelId, messageCount: messages.length });
 
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
-    system: BRIEFING_SYSTEM_PROMPT,
-    messages: [
-      {
-        role: 'user',
-        content: JSON.stringify(messages),
-      },
-    ],
-  });
-
-  const text = response.content[0].type === 'text' ? response.content[0].text : '';
+  const text = await callClaude(BRIEFING_SYSTEM_PROMPT, JSON.stringify(messages));
   const result = JSON.parse(text) as BriefingPromptResult;
   logger.info('generateBriefing done', { channelId });
   return result;
@@ -79,19 +76,7 @@ export async function generateTimeline(
 ): Promise<TimelinePromptResult> {
   logger.info('generateTimeline start', { messageCount: messages.length });
 
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 2048,
-    system: TIMELINE_SYSTEM_PROMPT,
-    messages: [
-      {
-        role: 'user',
-        content: JSON.stringify(messages),
-      },
-    ],
-  });
-
-  const text = response.content[0].type === 'text' ? response.content[0].text : '';
+  const text = await callClaude(TIMELINE_SYSTEM_PROMPT, JSON.stringify(messages));
   const result = JSON.parse(text) as TimelinePromptResult;
   logger.info('generateTimeline done', { itemCount: result.items.length });
   return result;
