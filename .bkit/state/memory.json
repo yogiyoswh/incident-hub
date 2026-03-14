@@ -6,6 +6,7 @@
     "level": "Starter"
   },
   "currentFeature": "incident-hub-dashboard",
-  "phase": "check",
-  "matchRate": 12.5
+  "phase": "archived",
+  "matchRate": 100,
+  "iterationCount": 1
 }
