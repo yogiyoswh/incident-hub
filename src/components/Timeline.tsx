@@ -23,11 +23,7 @@ function TimelineItemRow({
   item: TimelineItem;
   isCurrent: boolean;
 }) {
-  const time = new Date(item.time).toLocaleTimeString('ko-KR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'UTC',
-  });
+  const time = item.time;
 
   return (
     <div className="flex gap-4 py-3">
