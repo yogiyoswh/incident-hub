@@ -32,8 +32,13 @@ function callClaude(prompt: string, allowedTools?: string[]): Promise<string> {
     proc.on('close', (code) => {
       clearTimeout(timer);
       if (code === 0) {
-        const text = stdout.trim().replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '');
-        resolve(text.trim());
+        // 응답에서 JSON 객체 부분만 추출 (bkit 리포트 등 불필요한 텍스트 제거)
+        const jsonMatch = stdout.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          reject(new Error(`JSON을 찾을 수 없음. 응답: ${stdout.slice(0, 200)}`));
+          return;
+        }
+        resolve(jsonMatch[0]);
       } else {
         reject(new Error(`claude CLI 실패 (exit ${code}): ${stderr || stdout}`));
       }
@@ -110,9 +115,9 @@ export async function generateTimeline(
 
 const SLACK_THREAD_PROMPT = (slackThreadUrl: string) => `당신은 장애 대응 전문가입니다.
 
-mcp__mcpyo__slack_collect_channel_messages 도구로 아래 URL의 메시지를 가져온 뒤,
-브리핑과 타임라인을 생성하세요.
-URL이 스레드 링크면 해당 스레드만, 채널 링크면 최근 메시지를 가져오세요.
+지금 즉시 mcp__mcpyo__slack_collect_channel_messages 도구를 호출하여 아래 URL의 메시지를 가져오세요.
+- 스레드 URL(/p로 끝나는 경우): thread_ts 파라미터도 함께 전달
+- 채널 URL: after_date를 30일 전으로 설정하여 충분한 메시지 수집
 
 URL: ${slackThreadUrl}
 

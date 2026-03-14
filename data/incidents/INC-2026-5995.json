@@ -1,0 +1,209 @@
+{
+  "id": "INC-2026-5995",
+  "title": "오더요 서비스에서 DB 커넥션 에러가 발생하여 2026-03-13 08:40(UTC) 인시던트 채널이 자동 ",
+  "severity": "high",
+  "status": "open",
+  "slackChannel": "https://yogiyo.slack.com/archives/C0ALBEAJB62",
+  "createdAt": "2026-03-14T13:15:14.344Z",
+  "updatedAt": "2026-03-14T13:15:14.344Z",
+  "briefing": {
+    "detection": "오더요 서비스에서 DB 커넥션 에러가 발생하여 2026-03-13 08:40(UTC) 인시던트 채널이 자동 생성되었다. 채널 토픽으로 '오더요에서 DB 커넥션 에러가 발생하고 있습니다'가 설정되고, Kubernetes readiness/liveness probe 전체 실패 알림이 동시에 감지되었다.",
+    "customerImpact": "오더요 주문 처리가 불가하여 레드오더(처리 실패 주문)가 약 180건 발생하였다. DB 연결 단절로 인해 소수의 정상 pod에만 트래픽이 집중되어 서비스 응답 불능 상태가 지속되었다.",
+    "opsImpact": "오더요 샤드2 reader 인스턴스가 자동 재기동되면서 prod-orderyo-shard2-db-ro DB 연결이 단절되었다. DB 연결 실패로 readiness/liveness probe가 전체 실패하였으며, DB 정상화 후 전체 pod 재기동을 통해 약 5분 만에 서비스가 복구되었다. 사후 AWS 케이스 확인 결과 underlying hardware issue로 인한 인스턴스 호스트 교체가 원인이었다.",
+    "generatedAt": "2026-03-14T13:15:14.344Z",
+    "sourceChannel": "https://yogiyo.slack.com/archives/C0ALBEAJB62"
+  },
+  "timeline": [
+    {
+      "id": "c674b775-9a11-4d73-b1ba-beaf87ee985a",
+      "time": "08:41",
+      "datetime": "2026-03-13 08:41:08",
+      "tag": "ACTION",
+      "actor": "김병철(Byeongcheol Kim)/Order N Commerce-Tech",
+      "content": "장애 대응 Zoom 링크 공유 및 인시던트 채널 개설",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773391268116619"
+    },
+    {
+      "id": "8954637d-a8af-4da0-8869-255ccf0a8e9e",
+      "time": "08:41",
+      "datetime": "2026-03-13 08:41:10",
+      "tag": "ACTION",
+      "actor": "노정원(Jeongwon Roh)/SRE Platform",
+      "content": "readiness probe 모두 실패 중이므로 pod 재생성 시도하겠다고 공지",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773391270128799"
+    },
+    {
+      "id": "d4d405b2-2c31-4193-8a82-cfdf09403928",
+      "time": "08:42",
+      "datetime": "2026-03-13 08:42:01",
+      "tag": "RESULT",
+      "actor": "노정원(Jeongwon Roh)/SRE Platform",
+      "content": "liveness probe까지 Fail 중임을 보고",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773391321825209"
+    },
+    {
+      "id": "f2c4ae5a-ec93-4dc0-9fc6-2f12c17cbffb",
+      "time": "08:42",
+      "datetime": "2026-03-13 08:42:01",
+      "tag": "VERIFY",
+      "actor": "문정진(Jungjin Moon) /SRE Platform",
+      "content": "현재도 DB 연결이 안 되어 probe 실패 지속 중이라 pod 재생성이 효과 없을 것이라 언급",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773391321159339"
+    },
+    {
+      "id": "b6413f21-54bb-4e9c-8c43-458321bd3c79",
+      "time": "08:42",
+      "datetime": "2026-03-13 08:42:26",
+      "tag": "HYPOTHESIS",
+      "actor": "노정원(Jeongwon Roh)/SRE Platform",
+      "content": "DB와의 연결 문제로 판단",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773391346626469"
+    },
+    {
+      "id": "38f84a79-4351-4134-8a02-de2c36d3f307",
+      "time": "08:42",
+      "datetime": "2026-03-13 08:42:34",
+      "tag": "VERIFY",
+      "actor": "노정원(Jeongwon Roh)/SRE Platform",
+      "content": "에러 로그 공유: MySQLdb.OperationalError (2002) - prod-orderyo-shard2-db-ro 서버에 연결 불가",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773391354440649"
+    },
+    {
+      "id": "c5a39443-8fe6-498b-b4c3-42c3f9334f04",
+      "time": "08:45",
+      "datetime": "2026-03-13 08:45:18",
+      "tag": "RESULT",
+      "actor": "박태정(Taejeong Park)/Cloud Architect",
+      "content": "DB 재기동되면서 커넥션이 단절된 것으로 확인",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773391518011239"
+    },
+    {
+      "id": "c7f4fbb5-4b57-490f-9789-110d37150e27",
+      "time": "08:45",
+      "datetime": "2026-03-13 08:45:25",
+      "tag": "ACTION",
+      "actor": "노정원(Jeongwon Roh)/SRE Platform",
+      "content": "DB 연결 실패로 readiness/liveness probe 모두 실패. DB 상태 복구 후 모든 pod 재기동하여 정상화 완료",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773391525628839"
+    },
+    {
+      "id": "f5b9b0d4-a1a1-4aaf-bab4-8645065b4c09",
+      "time": "08:45",
+      "datetime": "2026-03-13 08:45:26",
+      "tag": "RESULT",
+      "actor": "김병철(Byeongcheol Kim)/Order N Commerce-Tech",
+      "content": "트래픽 정상 유입 확인",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773391526019009"
+    },
+    {
+      "id": "ecc161cb-fbea-4f1c-913a-37b8d718c219",
+      "time": "08:48",
+      "datetime": "2026-03-13 08:48:01",
+      "tag": "RESULT",
+      "actor": "박태정(Taejeong Park)/Cloud Architect",
+      "content": "DB는 17:41 재기동, 17:44 정상화된 것으로 확인",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773391681097519"
+    },
+    {
+      "id": "140e9be1-fcd3-4362-930a-96274ffd82d0",
+      "time": "08:49",
+      "datetime": "2026-03-13 08:49:20",
+      "tag": "RESULT",
+      "actor": "김건수(Geonsu Kim) / Discovery N Promotion-Tech",
+      "content": "채널요 주문 문제 없음 확인",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773391760208009"
+    },
+    {
+      "id": "2f71c9b5-55a0-4487-857c-d8ddfd6bb15d",
+      "time": "08:50",
+      "datetime": "2026-03-13 08:50:51",
+      "tag": "RESULT",
+      "actor": "이창우(Changwoo Lee) /Discovery N Promotion",
+      "content": "Promoyo 이슈 해소 확인",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773391851779389"
+    },
+    {
+      "id": "75de0735-9201-4965-a5c0-b98870aed599",
+      "time": "08:54",
+      "datetime": "2026-03-13 08:54:03",
+      "tag": "ACTION",
+      "actor": "이상우(Sangwoo Lee) / Customer Backend",
+      "content": "액션아이템 스레드 생성",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773392043268889"
+    },
+    {
+      "id": "97e9080a-9879-4d15-8ffb-23f246554fb5",
+      "time": "08:56",
+      "datetime": "2026-03-13 08:56:45",
+      "tag": "ACTION",
+      "actor": "박태정(Taejeong Park)/Cloud Architect",
+      "content": "DB 재기동 원인 파악을 위해 AWS 케이스 오픈, 답변 오는 대로 공유 예정",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773392205757699"
+    },
+    {
+      "id": "b8295851-d0d0-4edd-b8e5-6929983093ef",
+      "time": "08:57",
+      "datetime": "2026-03-13 08:57:00",
+      "tag": "ACTION",
+      "actor": "최이슬A(Iseul Choi)/고객만족팀",
+      "content": "장애 시간대 발생한 레드오더 약 180건에 대해 일괄 취소 가능 여부 확인 요청",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773392220029799"
+    },
+    {
+      "id": "65c49a8a-800c-45a9-962e-3b899f9a79e7",
+      "time": "09:07",
+      "datetime": "2026-03-13 09:07:04",
+      "tag": "RESULT",
+      "actor": "박태정(Taejeong Park)/Cloud Architect",
+      "content": "지표상 오더요 샤드 2~5 클러스터 전체적으로 네트워크 트래픽 및 전체 커넥션이 떨어진 것이 확인되어 업데이트 예정",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773392824364909"
+    },
+    {
+      "id": "58af5729-75f1-4568-92b5-13dbe043fa8c",
+      "time": "09:25",
+      "datetime": "2026-03-13 09:25:44",
+      "tag": "VERIFY",
+      "actor": "조기범(Keebeom Cho) /QC사업운영팀",
+      "content": "장애 영향 범위 문의: 푸드에만 영향이 있었는지, QC 스토어·요마트·요편의점에도 영향이 있었는지 확인 요청",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773393944822999"
+    },
+    {
+      "id": "844acb65-f8cc-429b-9caf-03ee91e201b7",
+      "time": "11:19",
+      "datetime": "2026-03-13 11:19:33",
+      "tag": "RESULT",
+      "actor": "김병철(Byeongcheol Kim)/Order N Commerce-Tech",
+      "content": "장애해소 공지: 17:40 DB 커넥션 에러 발생 및 채널 생성 → 17:41 샤드2 reader 인스턴스 자동 재기동·probe 전체 실패 → 17:42 DB 연결 불가 확인·pod 재생성 시도 → 17:44 DB 정상화 → 17:45 전체 pod 재기동·트래픽 정상화. 원인: AWS 케이스오픈 확인 중",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773400773310939"
+    },
+    {
+      "id": "c2e872f7-1744-4f4b-84d4-1461c5a63a08",
+      "time": "14:03",
+      "datetime": "2026-03-13 14:03:58",
+      "tag": "RESULT",
+      "actor": "남성우(Sungwoo Nam)/Cloud Architect",
+      "content": "AWS 케이스 답변 공유: aurora-mysql-orderyo-shard2-prod-b-1 인스턴스의 underlying hardware issue로 내부 모니터링 시스템과 통신 불가 → 인스턴스 Host replacement 수행. 이벤트 로��: 08:34 UTC 복구 시작, 08:41 UTC DB 인스턴스 재기동 완료",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C0ALBEAJB62/p1773410638642549"
+    }
+  ],
+  "responders": []
+}
