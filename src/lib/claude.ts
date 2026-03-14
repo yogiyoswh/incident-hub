@@ -1,5 +1,4 @@
-import { execFile } from 'child_process';
-import { promisify } from 'util';
+import { spawn } from 'child_process';
 import type {
   SlackMessage,
   BriefingPromptResult,
@@ -7,28 +6,39 @@ import type {
 } from '@/types/incident';
 import { logger } from '@/lib/logger';
 
-const execFileAsync = promisify(execFile);
+function callClaude(prompt: string, allowedTools?: string[]): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const args = ['-p', prompt];
+    if (allowedTools?.length) {
+      args.push('--allowedTools', allowedTools.join(','));
+    }
 
-async function callClaude(
-  prompt: string,
-  allowedTools?: string[],
-): Promise<string> {
-  const args = ['-p', prompt];
-  if (allowedTools?.length) {
-    args.push('--allowedTools', allowedTools.join(','));
-  }
-  try {
-    const { stdout } = await execFileAsync('claude', args, {
-      maxBuffer: 10 * 1024 * 1024,
-      timeout: 120_000,
-      input: '',
+    const proc = spawn('claude', args, {
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
-    return stdout.trim();
-  } catch (err) {
-    const e = err as { stdout?: string; stderr?: string; message?: string };
-    const detail = e.stderr || e.stdout || e.message || 'unknown';
-    throw new Error(`claude CLI 실패: ${detail}`);
-  }
+
+    proc.stdin.end();
+
+    let stdout = '';
+    let stderr = '';
+    proc.stdout.on('data', (chunk: Buffer) => { stdout += chunk.toString(); });
+    proc.stderr.on('data', (chunk: Buffer) => { stderr += chunk.toString(); });
+
+    const timer = setTimeout(() => {
+      proc.kill();
+      reject(new Error('claude CLI timeout (120s)'));
+    }, 120_000);
+
+    proc.on('close', (code) => {
+      clearTimeout(timer);
+      if (code === 0) {
+        const text = stdout.trim().replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '');
+        resolve(text.trim());
+      } else {
+        reject(new Error(`claude CLI 실패 (exit ${code}): ${stderr || stdout}`));
+      }
+    });
+  });
 }
 
 const BRIEFING_SYSTEM_PROMPT = `당신은 장애 대응 전문가입니다.

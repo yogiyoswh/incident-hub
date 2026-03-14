@@ -1,0 +1,131 @@
+{
+  "id": "INC-2026-3620",
+  "title": "2026-03-13 17:40 KST, 오더요 서비스에서 DB 커넥션 에러가 발생하여 인시던트 채널이 자동 ",
+  "severity": "high",
+  "status": "open",
+  "slackChannel": "https://yogiyo.slack.com/archives/C0ALBEAJB62",
+  "createdAt": "2026-03-14T13:00:08.046Z",
+  "updatedAt": "2026-03-14T13:00:08.046Z",
+  "briefing": {
+    "detection": "2026-03-13 17:40 KST, 오더요 서비스에서 DB 커넥션 에러가 발생하여 인시던트 채널이 자동 생성되었습니다. SRE 팀이 readiness probe 전체 실패를 즉시 감지하고 대응을 시작했습니다.",
+    "customerImpact": "푸드, QC 스토어, 요마트, 요편의점 등 모든 주문 채널에 걸쳐 주문 처리 장애가 발생했습니다. 장애 시간대에 처리되지 못한 레드오더가 180여 건 발생하여 일괄 취소 처리되었으며, 스토어 2건·퀵커머스 2건이 포함되었습니다.",
+    "opsImpact": "오더요 샤드2 reader 1 인스턴스가 AWS H/W 이슈로 자동 재기동되면서 DB 커넥션이 단절되었습니다. DB 연결 실패로 readiness probe가 전체 실패하여 소수 pod에 트래픽이 집중되었고, 연쇄적으로 liveness probe도 실패하였습니다. 또한 지표상 샤드 2~5 클러스터 전체에서 네트워크 트래픽 및 커넥션 감소가 확인되었습니다.",
+    "generatedAt": "2026-03-14T13:00:08.046Z",
+    "sourceChannel": "https://yogiyo.slack.com/archives/C0ALBEAJB62"
+  },
+  "timeline": [
+    {
+      "id": "4b79fd1b-c5d3-4d6e-8a39-8e0258c64545",
+      "time": "17:34",
+      "tag": "RESULT",
+      "actor": "AWS",
+      "content": "Aurora MySQL 샤드2 reader 인스턴스 호스트의 H/W 이슈 발생, AWS 내부 모니터링에서 인스턴스와의 통신 불가 감지. 호스트 교체(Recovery) 작업 자동 시작.",
+      "source": "slack"
+    },
+    {
+      "id": "2ca6f23a-30ac-4bf1-866b-4033390391f4",
+      "time": "17:40",
+      "tag": "ACTION",
+      "actor": "인시던트 시스템",
+      "content": "오더요 DB 커넥션 에러 감지, 인시던트 채널 자동 생성 및 관련 담당자 초대.",
+      "source": "slack"
+    },
+    {
+      "id": "8c0d5475-91cb-4594-ab7b-12d811dd14b7",
+      "time": "17:41",
+      "tag": "RESULT",
+      "actor": "AWS",
+      "content": "aurora-mysql-orderyo-shard2-prod-b-1 인스턴스 자동 재기동 완료. DB 재기동으로 인해 커넥션 단절 발생.",
+      "source": "slack"
+    },
+    {
+      "id": "b51d8419-9c1e-4261-a7a8-c20aa577eba7",
+      "time": "17:41",
+      "tag": "ACTION",
+      "actor": "노정원/SRE Platform",
+      "content": "readiness probe 전체 실패 확인, pod 재생성 시도.",
+      "source": "slack"
+    },
+    {
+      "id": "252c27b8-8b16-4a09-ba04-8340a3d34693",
+      "time": "17:42",
+      "tag": "VERIFY",
+      "actor": "노정원/SRE Platform",
+      "content": "liveness probe까지 실패 확인. `MySQLdb.OperationalError: Can't connect to server on 'prod-orderyo-shard2-db-ro.yogiyo.in'` 에러로 DB 연결 불가 확정.",
+      "source": "slack"
+    },
+    {
+      "id": "01d1a901-75de-47b5-87d4-3c1b6aa9675f",
+      "time": "17:44",
+      "tag": "RESULT",
+      "actor": "AWS",
+      "content": "DB 자동 재기동 후 정상화 완료.",
+      "source": "slack"
+    },
+    {
+      "id": "ddf7cac3-6eeb-49b8-9b88-587ed174176d",
+      "time": "17:45",
+      "tag": "ACTION",
+      "actor": "노정원/SRE Platform",
+      "content": "DB 상태 복구 확인 후 전체 pod 재기동 실행. DB 연결 실패 → readiness 실패 → 트래픽 쏠림 → liveness 실패의 연쇄 구조 파악.",
+      "source": "slack"
+    },
+    {
+      "id": "f7ba32c8-5d92-4dfb-974f-56e6d228ee58",
+      "time": "17:45",
+      "tag": "RESULT",
+      "actor": "김병철/Order N Commerce-Tech",
+      "content": "전체 pod 재기동 후 트래픽 정상 유입 확인. 서비스 정상화.",
+      "source": "slack"
+    },
+    {
+      "id": "e63d0899-f949-4638-ad1c-c35cb87dd5bf",
+      "time": "17:48",
+      "tag": "VERIFY",
+      "actor": "박태정/Cloud Architect",
+      "content": "DB 재기동이 자동으로 발생한 것임을 확인. 재기동 이전 특이사항 없음. AWS 케이스 오픈하여 근본 원인 조사 착수.",
+      "source": "slack"
+    },
+    {
+      "id": "c9b9cd0a-5ecc-44c5-8ef8-d4cb59f51a16",
+      "time": "17:54",
+      "tag": "DECISION",
+      "actor": "이상우/Customer Backend",
+      "content": "액션아이템 확정: 샤드 1개 장애 시 나머지 75%는 주문 가능해야 하며, readiness probe의 DB 커넥션 체크 로직 고도화 필요.",
+      "source": "slack"
+    },
+    {
+      "id": "58e2412d-200c-4971-b4db-7dcc9d64258c",
+      "time": "17:57",
+      "tag": "ACTION",
+      "actor": "최이슬/고객만족팀",
+      "content": "장애 시간대 레드오더 180여 건 일괄 취소 결정 및 실행 (김병철 승인).",
+      "source": "slack"
+    },
+    {
+      "id": "114f08fd-bd07-4ea1-92df-95651ebbff33",
+      "time": "18:07",
+      "tag": "VERIFY",
+      "actor": "박태정/Cloud Architect",
+      "content": "Datadog 지표 분석 결과, 실제 재기동된 인스턴스는 샤드2 reader 1이나, 샤드 2~5 클러스터 전체에서 네트워크 트래픽 및 커넥션 감소 확인. 추가 분석 예정.",
+      "source": "slack"
+    },
+    {
+      "id": "16cfd827-110b-4ceb-a8dc-346c00ccf9e0",
+      "time": "18:19",
+      "tag": "ACTION",
+      "actor": "김병철/Order N Commerce-Tech",
+      "content": "장애해소공지 발행. 원인(DB 자동 재기동으로 커넥션 단절), 해결(pod 전체 재기동), 후속 조치(AWS 케이스 확인 중) 포함.",
+      "source": "slack"
+    },
+    {
+      "id": "23d284f5-7dfb-4b6e-a0b7-8866e9d94dbf",
+      "time": "23:03",
+      "tag": "RESULT",
+      "actor": "남성우/Cloud Architect",
+      "content": "AWS 케이스 답변 공유: 인스턴스 호스트의 H/W 이슈로 AWS 내부 모니터링이 통신 불가를 감지하여 Host Replacement 작업이 수행되었음. 이로 인해 재기동 시간이 오래 소요된 것으로 확인.",
+      "source": "slack"
+    }
+  ],
+  "responders": []
+}
