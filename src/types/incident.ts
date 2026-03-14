@@ -72,18 +72,12 @@ export type TimelinePromptResult = {
   }>;
 };
 
-export type ParsedSlackThread = {
-  channelId: string;
-  threadTs: string;
-};
-
 export type SlackThreadBriefingRequest = {
   slackThreadUrl: string;
+  severity?: IncidentSeverity;
 };
 
 export type SlackThreadBriefingResponse = {
-  briefing: BriefingPromptResult;
+  incidentId: string;
   messageCount: number;
-  channelId: string;
-  threadTs: string;
 };

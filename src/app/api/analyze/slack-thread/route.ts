@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import type {
   ApiResponse,
+  Incident,
   SlackThreadBriefingRequest,
   SlackThreadBriefingResponse,
 } from '@/types/incident';
-import { parseSlackThreadUrl, fetchThreadMessages } from '@/lib/slack';
-import { generateBriefing } from '@/lib/claude';
+import { analyzeSlackThread } from '@/lib/claude';
+import { saveIncident } from '@/lib/incidents';
 import { logger } from '@/lib/logger';
 
 export async function POST(
@@ -13,7 +15,7 @@ export async function POST(
 ): Promise<NextResponse<ApiResponse<SlackThreadBriefingResponse>>> {
   try {
     const body = (await request.json()) as SlackThreadBriefingRequest;
-    const { slackThreadUrl } = body;
+    const { slackThreadUrl, severity = 'medium' } = body;
 
     if (!slackThreadUrl) {
       return NextResponse.json(
@@ -22,27 +24,50 @@ export async function POST(
       );
     }
 
-    let channelId: string;
-    let threadTs: string;
-    try {
-      ({ channelId, threadTs } = parseSlackThreadUrl(slackThreadUrl));
-    } catch (err) {
+    if (!/\/archives\/[A-Z0-9]+\/p\d+/.test(slackThreadUrl)) {
       return NextResponse.json(
-        { success: false, error: err instanceof Error ? err.message : '올바른 Slack 스레드 URL이 아닙니다' },
+        { success: false, error: '올바른 Slack 스레드 URL이 아닙니다' },
         { status: 400 },
       );
     }
 
-    logger.info('slack-thread analyze start', { channelId, threadTs });
+    logger.info('slack-thread analyze start', { slackThreadUrl });
 
-    const messages = await fetchThreadMessages(channelId, threadTs);
-    const briefing = await generateBriefing(messages, channelId);
+    const { briefing, timeline } = await analyzeSlackThread(slackThreadUrl);
 
-    logger.info('slack-thread analyze done', { channelId, messageCount: messages.length });
+    const now = new Date().toISOString();
+    const incidentId = `INC-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
+
+    const incident: Incident = {
+      id: incidentId,
+      title: briefing.detection.slice(0, 60),
+      severity,
+      status: 'open',
+      slackChannel: slackThreadUrl,
+      createdAt: now,
+      updatedAt: now,
+      briefing: {
+        ...briefing,
+        generatedAt: now,
+        sourceChannel: slackThreadUrl,
+      },
+      timeline: timeline.items.map((item) => ({
+        id: randomUUID(),
+        time: item.time,
+        tag: item.tag,
+        actor: item.actor,
+        content: item.content,
+        source: 'slack' as const,
+      })),
+      responders: [],
+    };
+
+    await saveIncident(incident);
+    logger.info('slack-thread analyze done', { incidentId });
 
     return NextResponse.json({
       success: true,
-      data: { briefing, messageCount: messages.length, channelId, threadTs },
+      data: { incidentId, messageCount: timeline.items.length },
     });
   } catch (err) {
     logger.error('slack-thread analyze error', err);

@@ -9,10 +9,17 @@ import { logger } from '@/lib/logger';
 
 const execFileAsync = promisify(execFile);
 
-async function callClaude(systemPrompt: string, userContent: string): Promise<string> {
-  const fullPrompt = `${systemPrompt}\n\n${userContent}`;
-  const { stdout } = await execFileAsync('claude', ['-p', fullPrompt], {
+async function callClaude(
+  prompt: string,
+  allowedTools?: string[],
+): Promise<string> {
+  const args = ['-p', prompt];
+  if (allowedTools?.length) {
+    args.push('--allowedTools', allowedTools.join(','));
+  }
+  const { stdout } = await execFileAsync('claude', args, {
     maxBuffer: 10 * 1024 * 1024,
+    timeout: 60_000,
   });
   return stdout.trim();
 }
@@ -65,7 +72,8 @@ export async function generateBriefing(
 ): Promise<BriefingPromptResult> {
   logger.info('generateBriefing start', { channelId, messageCount: messages.length });
 
-  const text = await callClaude(BRIEFING_SYSTEM_PROMPT, JSON.stringify(messages));
+  const prompt = `${BRIEFING_SYSTEM_PROMPT}\n\n${JSON.stringify(messages)}`;
+  const text = await callClaude(prompt);
   const result = JSON.parse(text) as BriefingPromptResult;
   logger.info('generateBriefing done', { channelId });
   return result;
@@ -76,8 +84,61 @@ export async function generateTimeline(
 ): Promise<TimelinePromptResult> {
   logger.info('generateTimeline start', { messageCount: messages.length });
 
-  const text = await callClaude(TIMELINE_SYSTEM_PROMPT, JSON.stringify(messages));
+  const prompt = `${TIMELINE_SYSTEM_PROMPT}\n\n${JSON.stringify(messages)}`;
+  const text = await callClaude(prompt);
   const result = JSON.parse(text) as TimelinePromptResult;
   logger.info('generateTimeline done', { itemCount: result.items.length });
+  return result;
+}
+
+const SLACK_THREAD_PROMPT = (slackThreadUrl: string) => `당신은 장애 대응 전문가입니다.
+
+다음 Slack 스레드의 메시지를 mcp__mcpyo__slack_collect_channel_messages 도구로 가져온 뒤,
+브리핑과 타임라인을 생성하세요.
+
+URL: ${slackThreadUrl}
+
+반드시 아래 JSON 형식으로만 응답하세요. JSON 외 다른 텍스트는 절대 포함하지 마세요.
+
+{
+  "briefing": {
+    "detection": "인지 방법 (2~3문장)",
+    "customerImpact": "고객 관점 현상 (2~3문장)",
+    "opsImpact": "서비스 운영 관점 현상 (2~3문장)"
+  },
+  "timeline": {
+    "items": [
+      {
+        "time": "HH:MM",
+        "tag": "ACTION|DECISION|HYPOTHESIS|VERIFY|RESULT",
+        "actor": "행위자 이름",
+        "content": "핵심 내용 1~2문장"
+      }
+    ]
+  }
+}
+
+규칙:
+- 사실만 기술 (추측 금지)
+- 한국어로 작성
+- 중요하지 않은 메시지는 타임라인에서 제외
+- 시간 순서 정렬`;
+
+export type SlackThreadAnalysisResult = {
+  briefing: BriefingPromptResult;
+  timeline: TimelinePromptResult;
+};
+
+export async function analyzeSlackThread(
+  slackThreadUrl: string,
+): Promise<SlackThreadAnalysisResult> {
+  logger.info('analyzeSlackThread start', { slackThreadUrl });
+
+  const text = await callClaude(SLACK_THREAD_PROMPT(slackThreadUrl), [
+    'mcp__mcpyo__slack_collect_channel_messages',
+  ]);
+
+  const result = JSON.parse(text) as { briefing: BriefingPromptResult; timeline: TimelinePromptResult };
+  logger.info('analyzeSlackThread done', { slackThreadUrl });
   return result;
 }
