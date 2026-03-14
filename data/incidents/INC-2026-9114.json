@@ -1,0 +1,109 @@
+{
+  "id": "INC-2026-9114",
+  "title": "Datadog에서 promoyo 서비스의 servlet 에러율이 0.1% 임계치를 초과(0.124%)하여 C",
+  "severity": "medium",
+  "status": "open",
+  "slackChannel": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773390773382349",
+  "createdAt": "2026-03-14T13:39:23.099Z",
+  "updatedAt": "2026-03-14T13:39:23.099Z",
+  "briefing": {
+    "detection": "Datadog에서 promoyo 서비스의 servlet 에러율이 0.1% 임계치를 초과(0.124%)하여 CRITICAL 알림이 발생하였습니다. 이후 이벤트페이지 API 호출에서 대량 503 에러가 확인되었습니다.",
+    "customerImpact": "주문 관련 고객 CS 인입이 증가하고 있으며, 오더요 어드민 접속도 불가한 상태입니다.",
+    "opsImpact": "aurora-mysql-orderyo-shard2-prod-b-1 DB 인스턴스가 비정상 종료되어 prod-orderyo-shard2-db-ro에 연결 불가 상태가 발생하였고, front-api의 Readiness probe도 실패하고 있습니다.",
+    "generatedAt": "2026-03-14T13:39:23.099Z",
+    "sourceChannel": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773390773382349"
+  },
+  "timeline": [
+    {
+      "id": "9fdd17bb-849e-4bfd-b79a-805169bfa4c5",
+      "time": "08:32",
+      "datetime": "2026-03-13 08:32:53",
+      "tag": "RESULT",
+      "actor": "Datadog",
+      "content": "[CRITICAL] promoyo servlet - prod 환경에서 에러율 0.1% 이상 발생 (측정값: 0.124%)",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773390773382349"
+    },
+    {
+      "id": "3dc86b6d-1ad8-4350-8fc6-7ee1685acbe4",
+      "time": "08:35",
+      "datetime": "2026-03-13 08:35:10",
+      "tag": "RESULT",
+      "actor": "이창우(Changwoo Lee) /Discovery N Promotion",
+      "content": "이벤트페이지에서 API 호출 시 대량 503 에러 발생",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773390910354279"
+    },
+    {
+      "id": "1e44a73b-a97e-4eb5-b0c2-003d3abbc91d",
+      "time": "08:38",
+      "datetime": "2026-03-13 08:38:38",
+      "tag": "RESULT",
+      "actor": "김병철(Byeongcheol Kim)/Order N Commerce-Tech",
+      "content": "front-api Readiness probe 실패 - http://10.52.10.109:15020/app-health/front-api/readyz 에 대한 context deadline exceeded 발생",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391118830629"
+    },
+    {
+      "id": "c83fa377-a9a9-4eb6-86fc-29504bbf997f",
+      "time": "08:38",
+      "datetime": "2026-03-13 08:38:39",
+      "tag": "RESULT",
+      "actor": "문정진(Jungjin Moon) /SRE Platform",
+      "content": "aurora-mysql-orderyo-shard2-prod-b-1 인스턴스 비정상 종료 Keepalive 알림 발생, DBA 및 주문 팀에 알림",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391119845529"
+    },
+    {
+      "id": "af9b208b-2861-4568-910f-a7aa761f6d70",
+      "time": "08:39",
+      "datetime": "2026-03-13 08:39:25",
+      "tag": "RESULT",
+      "actor": "김병철(Byeongcheol Kim)/Order N Commerce-Tech",
+      "content": "prod-orderyo-shard2-db-ro.yogiyo.in DB에 연결 불가 에러 발생 (django.db.utils.OperationalError: Can't connect to server, errno 115)",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391165997049"
+    },
+    {
+      "id": "bf1f6fdc-3b74-4977-9e2c-c167f790d8df",
+      "time": "08:39",
+      "datetime": "2026-03-13 08:39:44",
+      "tag": "DECISION",
+      "actor": "김병철(Byeongcheol Kim)/Order N Commerce-Tech",
+      "content": "장애 선언",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391184218679"
+    },
+    {
+      "id": "18823f90-ae92-4356-950d-2e483a8a8b3f",
+      "time": "08:39",
+      "datetime": "2026-03-13 08:39:44",
+      "tag": "ACTION",
+      "actor": "문정진(Jungjin Moon) /SRE Platform",
+      "content": "DBA 팀에 DB 확인 요청",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391184321849"
+    },
+    {
+      "id": "62e73308-7c49-4e5d-9b9c-5f0d13e7a3f1",
+      "time": "08:39",
+      "datetime": "2026-03-13 08:39:54",
+      "tag": "RESULT",
+      "actor": "최이슬A(Iseul Choi)/고객만족팀",
+      "content": "주문 장애 관련 고객 CS 인입 증가, 오더요 어드민 접속 불가",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391194578869"
+    },
+    {
+      "id": "6e09de2d-b41e-4a72-864f-e32b7a62f828",
+      "time": "08:40",
+      "datetime": "2026-03-13 08:40:53",
+      "tag": "HYPOTHESIS",
+      "actor": "남성우(Sungwoo Nam)/Cloud Architect",
+      "content": "직전 orderyo 샤드 인스턴스 장애 영향으로 추정",
+      "source": "slack",
+      "sourceUrl": "https://yogiyo.slack.com/archives/C02PJ2TNKKP/p1773391253041389"
+    }
+  ],
+  "responders": []
+}
